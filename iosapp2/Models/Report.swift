@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-struct Report: Identifiable, Hashable {
+struct Report: Identifiable {
     enum Status: String {
         case pending
         case inProgress
@@ -33,4 +33,12 @@ struct Report: Identifiable, Hashable {
         self.coordinate = coordinate
         self.status = status
     }
+}
+
+extension Report: Equatable {
+    static func == (lhs: Report, rhs: Report) -> Bool { lhs.id == rhs.id }
+}
+
+extension Report: Hashable {
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }

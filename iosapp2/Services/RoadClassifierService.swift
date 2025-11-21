@@ -18,20 +18,26 @@ final class RoadClassifierService {
 
     private func loadModelIfAvailable() {
         // IMPORTANT: When you add RoadIssueDetector.mlmodel to the project,
-        // Xcode will generate a `RoadIssueDetector` class. Replace the `if let`
-        // below with the actual generated model type if the name differs.
+        // Xcode will generate a `RoadIssueDetector` class. Replace the name
+        // below if your file differs.
         do {
-            if let modelURL = Bundle.main.url(forResource: "RoadIssueDetector", withExtension: "mlmodelc") {
-                let compiledURL = modelURL
+            if let compiledURL = Bundle.main.url(forResource: "RoadIssueDetector", withExtension: "mlmodelc") {
                 let mlModel = try MLModel(contentsOf: compiledURL)
                 coreMLModel = try VNCoreMLModel(for: mlModel)
-            } else if let compiledURL = try? MLModel.compileModel(at: Bundle.main.url(forResource: "RoadIssueDetector", withExtension: "mlmodel")!) {
-                let mlModel = try MLModel(contentsOf: compiledURL)
-                coreMLModel = try VNCoreMLModel(for: mlModel)
+                return
             }
+
+            if let sourceURL = Bundle.main.url(forResource: "RoadIssueDetector", withExtension: "mlmodel") {
+                let compiledURL = try MLModel.compileModel(at: sourceURL)
+                let mlModel = try MLModel(contentsOf: compiledURL)
+                coreMLModel = try VNCoreMLModel(for: mlModel)
+                return
+            }
+
+            // Model not present; leave as nil and fall back to mock classification
+            coreMLModel = nil
         } catch {
-            // If the model is not present yet or fails to load, we keep
-            // `coreMLModel` as nil and rely on a mock classification.
+            // If the model fails to load, fall back to mock classification
             coreMLModel = nil
         }
     }
@@ -42,12 +48,12 @@ final class RoadClassifierService {
     }
 
     /// Public async API to classify a UIImage. If the underlying model is not
-    /// available, this returns a mock `Pothole` classification so that the UI
+    /// available, this returns a mock `Pothole Issues` classification so that the UI
     /// can be developed and tested without the real model.
     func classify(image: UIImage) async -> ClassificationResult {
         guard let coreMLModel = coreMLModel else {
             // Mock result used when model is missing
-            return ClassificationResult(label: "Pothole", confidence: 0.9)
+            return ClassificationResult(label: "Pothole Issues", confidence: 0.9)
         }
 
         return await withCheckedContinuation { continuation in

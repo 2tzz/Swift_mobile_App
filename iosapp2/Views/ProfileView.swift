@@ -3,9 +3,28 @@ import Charts
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
+    @EnvironmentObject private var auth: AuthService
 
     var body: some View {
         List {
+            if let user = auth.currentUser {
+                Section("Account") {
+                    HStack {
+                        Image(systemName: "person.crop.circle.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(.accentColor)
+                        VStack(alignment: .leading) {
+                            Text(user.name).font(.headline)
+                            Text(user.email).foregroundColor(.secondary).font(.subheadline)
+                        }
+                    }
+
+                    Button(role: .destructive) { auth.signOut() } label: {
+                        Text("Sign Out").frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+
             Section("Overview") {
                 if viewModel.myReports.isEmpty {
                     Text("No reports submitted yet.")
