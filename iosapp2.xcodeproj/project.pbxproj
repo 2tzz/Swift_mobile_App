@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		758763562ED094C30059C314 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 758763532ED08C130059C314 /* GoogleService-Info.plist */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
-		758762F22ED05BA90059C314 /* iosapp2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosapp2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		758762F22ED05BA90059C314 /* iosapp2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = iosapp2.app; path = FixLK.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		758763532ED08C130059C314 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../swift/Swift_mobile_App/GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				758762F42ED05BA90059C314 /* iosapp2 */,
+				758763522ED08C130059C314 /* Frameworks */,
 				758762F32ED05BA90059C314 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +49,14 @@
 				758762F22ED05BA90059C314 /* iosapp2.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		758763522ED08C130059C314 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				758763532ED08C130059C314 /* GoogleService-Info.plist */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +126,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				758763562ED094C30059C314 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,6 +271,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FixLK;
+				INFOPLIST_KEY_CFBundleName = FixLK;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -267,7 +284,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = thilakshana.myapp.iosapp2;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = FixLK;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -287,6 +304,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FixLK;
+				INFOPLIST_KEY_CFBundleName = FixLK;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -298,7 +317,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = thilakshana.myapp.iosapp2;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = FixLK;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;

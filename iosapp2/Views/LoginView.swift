@@ -8,10 +8,19 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            LiquidBackground()
-                .allowsHitTesting(false)
+            LinearGradient(
+                colors: [Color.gray.opacity(0.95), Color.black.opacity(0.98)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
 
             VStack(spacing: 24) {
+                Image(systemName: "road.lanes")
+                    .font(.system(size: 48, weight: .semibold))
+                    .foregroundStyle(Color.yellow)
+                    .shadow(color: Color.yellow.opacity(0.5), radius: 12, x: 0, y: 0)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Welcome to FixLK")
                         .font(.title.bold())
@@ -32,7 +41,7 @@ struct LoginView: View {
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                                .stroke(Color.yellow.opacity(0.35), lineWidth: 1)
                         )
 
                     SecureField("Password", text: $password)
@@ -43,7 +52,7 @@ struct LoginView: View {
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                                .stroke(Color.yellow.opacity(0.35), lineWidth: 1)
                         )
                 }
 
@@ -59,6 +68,7 @@ struct LoginView: View {
                 } label: {
                     if auth.isAuthenticating {
                         ProgressView()
+                            .tint(Color.yellow)
                             .progressViewStyle(.circular)
                             .frame(maxWidth: .infinity)
                     } else {
@@ -67,7 +77,7 @@ struct LoginView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color.white.opacity(0.85))
+                .tint(Color.yellow)
                 .foregroundColor(.black)
                 .disabled(email.isEmpty || password.isEmpty)
 
@@ -75,6 +85,7 @@ struct LoginView: View {
                     Text("No account?")
                         .foregroundColor(.white.opacity(0.8))
                     NavigationLink("Create one", destination: RegisterView().environmentObject(auth))
+                        .foregroundColor(Color.yellow)
                         .fontWeight(.semibold)
                 }
             }
@@ -86,10 +97,10 @@ struct LoginView: View {
             .overlay(
                 ZStack {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(Color.white.opacity(0.28), lineWidth: 1.2)
+                        .stroke(Color.yellow.opacity(0.4), lineWidth: 1.2)
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .fill(
-                            LinearGradient(colors: [Color.white.opacity(0.22), Color.white.opacity(0.02)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            LinearGradient(colors: [Color.yellow.opacity(0.12), Color.white.opacity(0.02)], startPoint: .topLeading, endPoint: .bottomTrailing)
                         )
                         .blendMode(.softLight)
                         .opacity(0.7)

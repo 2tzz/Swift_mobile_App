@@ -9,7 +9,7 @@ struct LoadingView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.blue.opacity(0.9), Color.black.opacity(0.9)],
+                colors: [Color.gray.opacity(0.95), Color.black.opacity(0.98)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -18,13 +18,13 @@ struct LoadingView: View {
             VStack(spacing: 32) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .strokeBorder(Color.white.opacity(0.3), lineWidth: 2)
+                        .strokeBorder(Color.yellow.opacity(0.5), lineWidth: 2)
                         .frame(width: 220, height: 140)
                         .overlay {
                             ZStack {
                                 ForEach(0..<3) { index in
                                     Capsule()
-                                        .fill(Color.white.opacity(0.15))
+                                        .fill(Color.white.opacity(0.10))
                                         .frame(height: 4)
                                         .offset(y: CGFloat(index * 16 - 16))
                                 }
@@ -33,9 +33,9 @@ struct LoadingView: View {
                                     .fill(
                                         LinearGradient(
                                             colors: [
-                                                Color.white.opacity(0),
-                                                Color.white.opacity(0.7),
-                                                Color.white.opacity(0)
+                                                Color.yellow.opacity(0),
+                                                Color.yellow,
+                                                Color.yellow.opacity(0)
                                             ],
                                             startPoint: .leading,
                                             endPoint: .trailing
@@ -46,17 +46,17 @@ struct LoadingView: View {
                                     .blur(radius: 4)
                             }
                         }
-                        .shadow(color: Color.black.opacity(0.4), radius: 16, x: 0, y: 8)
+                        .shadow(color: Color.yellow.opacity(0.2), radius: 16, x: 0, y: 8)
 
                     VStack {
-                        Image(systemName: "mappin.circle.fill")
-                            .font(.system(size: 56))
-                            .foregroundStyle(.white)
+                        Image(systemName: "road.lanes")
+                            .font(.system(size: 56, weight: .semibold))
+                            .foregroundStyle(Color.yellow)
                             .scaleEffect(isPulsing ? 1.08 : 0.94)
-                            .shadow(color: Color.blue.opacity(0.6), radius: 18, x: 0, y: 0)
+                            .shadow(color: Color.yellow.opacity(0.6), radius: 18, x: 0, y: 0)
 
                         Circle()
-                            .fill(Color.white.opacity(0.18))
+                            .fill(Color.yellow.opacity(0.18))
                             .frame(width: 70, height: 10)
                             .blur(radius: 8)
                             .scaleEffect(isPulsing ? 1.15 : 0.85)
@@ -69,13 +69,13 @@ struct LoadingView: View {
                         .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
 
-                    Text("Scanning nearby roads for issues")
+                    Text("Assessing urban road safety and reporting issues")
                         .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(Color.yellow.opacity(0.85))
                 }
 
                 ProgressView()
-                    .tint(.white)
+                    .tint(Color.yellow)
                     .progressViewStyle(.circular)
             }
             .padding(32)

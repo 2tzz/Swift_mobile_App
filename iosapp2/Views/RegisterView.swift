@@ -9,15 +9,25 @@ struct RegisterView: View {
 
     var body: some View {
         ZStack {
-            LiquidBackground().allowsHitTesting(false)
+            LinearGradient(
+                colors: [Color.gray.opacity(0.95), Color.black.opacity(0.98)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
 
             VStack(spacing: 20) {
+                Image(systemName: "road.lanes")
+                    .font(.system(size: 48, weight: .semibold))
+                    .foregroundStyle(Color.yellow)
+                    .shadow(color: Color.yellow.opacity(0.5), radius: 12, x: 0, y: 0)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Create Account")
                         .font(.title.bold())
                         .foregroundColor(.white)
-                    Text("Join FixLK to report and track issues")
-                        .foregroundColor(.white.opacity(0.8))
+                    Text("Join FixLK to improve urban road safety")
+                        .foregroundColor(Color.yellow.opacity(0.85))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -27,7 +37,7 @@ struct RegisterView: View {
                         .padding(.horizontal, 14)
                         .padding(.vertical, 12)
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25)))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.yellow.opacity(0.35)))
 
                     TextField("Email", text: $email)
                         .textContentType(.emailAddress)
@@ -37,7 +47,7 @@ struct RegisterView: View {
                         .padding(.horizontal, 14)
                         .padding(.vertical, 12)
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25)))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.yellow.opacity(0.35)))
 
                     SecureField("Password", text: $password)
                         .textContentType(.newPassword)
@@ -45,7 +55,7 @@ struct RegisterView: View {
                         .padding(.horizontal, 14)
                         .padding(.vertical, 12)
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.25)))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.yellow.opacity(0.35)))
                 }
 
                 if let error = auth.authError {
@@ -59,13 +69,15 @@ struct RegisterView: View {
                     Task { await auth.signUp(name: name, email: email, password: password) }
                 } label: {
                     if auth.isAuthenticating {
-                        ProgressView().frame(maxWidth: .infinity)
+                        ProgressView()
+                            .tint(Color.yellow)
+                            .frame(maxWidth: .infinity)
                     } else {
                         Text("Create Account").frame(maxWidth: .infinity)
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color.white.opacity(0.85))
+                .tint(Color.yellow)
                 .foregroundColor(.black)
                 .disabled(name.isEmpty || email.isEmpty || password.isEmpty)
             }
@@ -73,7 +85,7 @@ struct RegisterView: View {
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .stroke(Color.white.opacity(0.28), lineWidth: 1.2)
+                    .stroke(Color.yellow.opacity(0.4), lineWidth: 1.2)
             )
             .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
             .padding()
