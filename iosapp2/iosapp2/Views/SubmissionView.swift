@@ -1,11 +1,15 @@
 import SwiftUI
 import MapKit
+import PhotosUI
 
 struct SubmissionView: View {
     @Environment(\.dismiss) private var dismiss
 
     @StateObject private var viewModel: SubmissionViewModel
     @State private var showCamera: Bool = false
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
+    @State private var selectedItem: PhotosPickerItem? = nil
 
     init(coordinate: CLLocationCoordinate2D?) {
         _viewModel = StateObject(wrappedValue: SubmissionViewModel(classifier: .shared, initialCoordinate: coordinate))
@@ -21,12 +25,16 @@ struct SubmissionView: View {
                             .scaledToFill()
                             .frame(height: 200)
                             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    } else {
-                        Button {
-                            showCamera = true
-                        } label: {
-                            Label("Capture Road Photo", systemImage: "camera.viewfinder")
-                        }
+                    }
+
+                    Button {
+                        showCamera = true
+                    } label: {
+                        Label(viewModel.capturedImage == nil ? "Capture Photo" : "Capture New Photo", systemImage: "camera.viewfinder")
+                    }
+
+                    PhotosPicker(selection: $selectedItem, matching: .images) {
+                        Label(viewModel.capturedImage == nil ? "Upload from Photos" : "Upload Different Photo", systemImage: "photo.on.rectangle")
                     }
                 }
 
@@ -50,8 +58,8 @@ struct SubmissionView: View {
                                 try await viewModel.submitReport()
                                 dismiss()
                             } catch {
-                                // In a later phase, surface a user-facing error.
-                                dismiss()
+                                errorMessage = error.localizedDescription
+                                showError = true
                             }
                         }
                     } label: {
@@ -72,6 +80,26 @@ struct SubmissionView: View {
                     Task { @MainActor in
                         viewModel.assignCapturedImage(image)
                         await viewModel.classifyCurrentImage()
+                    }
+                }
+            }
+            .alert("Submission failed", isPresented: $showError, actions: {
+                Button("OK", role: .cancel) {}
+            }, message: {
+                Text(errorMessage)
+            })
+            .onChange(of: selectedItem) { newItem in
+                guard let newItem = newItem else { return }
+                Task { @MainActor in
+                    do {
+                        if let data = try await newItem.loadTransferable(type: Data.self),
+                           let image = UIImage(data: data) {
+                            viewModel.assignCapturedImage(image)
+                            await viewModel.classifyCurrentImage()
+                        }
+                    } catch {
+                        errorMessage = error.localizedDescription
+                        showError = true
                     }
                 }
             }

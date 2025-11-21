@@ -11,7 +11,7 @@ final class PersistenceController {
 
     private init(inMemory: Bool = false) {
         let model = Self.makeModel()
-        container = NSPersistentContainer(name: "CivicFixDataModel", managedObjectModel: model)
+        container = NSPersistentContainer(name: "FixLKDataModel", managedObjectModel: model)
 
         if inMemory {
             container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
@@ -30,9 +30,9 @@ final class PersistenceController {
     private static func makeModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
 
-        let entity = NSEntityDescription()
-        entity.name = "ReportEntity"
-        entity.managedObjectClassName = "ReportEntity"
+        let reportEntity = NSEntityDescription()
+        reportEntity.name = "ReportEntity"
+        reportEntity.managedObjectClassName = "ReportEntity"
 
         var properties: [NSAttributeDescription] = []
 
@@ -84,8 +84,53 @@ final class PersistenceController {
         statusAttr.isOptional = false
         properties.append(statusAttr)
 
-        entity.properties = properties
-        model.entities = [entity]
+        reportEntity.properties = properties
+
+        let userEntity = NSEntityDescription()
+        userEntity.name = "UserEntity"
+        userEntity.managedObjectClassName = "UserEntity"
+
+        var userProps: [NSAttributeDescription] = []
+
+        let userId = NSAttributeDescription()
+        userId.name = "id"
+        userId.attributeType = .UUIDAttributeType
+        userId.isOptional = false
+        userProps.append(userId)
+
+        let userName = NSAttributeDescription()
+        userName.name = "name"
+        userName.attributeType = .stringAttributeType
+        userName.isOptional = false
+        userProps.append(userName)
+
+        let userEmail = NSAttributeDescription()
+        userEmail.name = "email"
+        userEmail.attributeType = .stringAttributeType
+        userEmail.isOptional = false
+        userProps.append(userEmail)
+
+        let passwordHash = NSAttributeDescription()
+        passwordHash.name = "passwordHash"
+        passwordHash.attributeType = .stringAttributeType
+        passwordHash.isOptional = false
+        userProps.append(passwordHash)
+
+        let imageData = NSAttributeDescription()
+        imageData.name = "imageData"
+        imageData.attributeType = .binaryDataAttributeType
+        imageData.isOptional = true
+        userProps.append(imageData)
+
+        let userCreatedAt = NSAttributeDescription()
+        userCreatedAt.name = "createdAt"
+        userCreatedAt.attributeType = .dateAttributeType
+        userCreatedAt.isOptional = false
+        userProps.append(userCreatedAt)
+
+        userEntity.properties = userProps
+
+        model.entities = [reportEntity, userEntity]
         return model
     }
 }

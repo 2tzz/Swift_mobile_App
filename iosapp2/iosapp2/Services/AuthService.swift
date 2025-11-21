@@ -1,7 +1,11 @@
 import Foundation
 import Combine
+import UIKit
 #if canImport(FirebaseAuth)
 import FirebaseAuth
+#endif
+#if canImport(FirebaseFirestore)
+import FirebaseFirestore
 #endif
 
 final class AuthService: ObservableObject {
@@ -12,6 +16,8 @@ final class AuthService: ObservableObject {
     #if canImport(FirebaseAuth)
     private var authHandle: AuthStateDidChangeListenerHandle?
     #endif
+
+    private let userRepository: UserRepository = CoreDataUserRepository()
 
     init() {
         #if canImport(FirebaseAuth)
@@ -59,10 +65,17 @@ final class AuthService: ObservableObject {
             self.authError = error.localizedDescription
         }
         #else
-        // Mock fallback when FirebaseAuth is not linked
-        try? await Task.sleep(nanoseconds: 300_000_000)
-        self.currentUser = User(id: UUID().uuidString, name: email.components(separatedBy: "@").first ?? "User", email: email)
-        self.authError = nil
+        do {
+            try await Task.sleep(nanoseconds: 100_000_000)
+            if let user = try userRepository.authenticate(email: email, password: password) {
+                self.currentUser = user
+                self.authError = nil
+            } else {
+                self.authError = "Invalid credentials."
+            }
+        } catch {
+            self.authError = error.localizedDescription
+        }
         #endif
     }
 
@@ -101,15 +114,48 @@ final class AuthService: ObservableObject {
                     if let error = error { c.resume(throwing: error) } else { c.resume() }
                 }
             }
+            // Create user profile document in Firestore (optional but useful)
+            #if canImport(FirebaseFirestore)
+            if let uid = Auth.auth().currentUser?.uid {
+                let db = Firestore.firestore()
+                let data: [String: Any] = [
+                    "name": name,
+                    "email": email,
+                    "createdAt": Timestamp(date: Date())
+                ]
+                try? await withCheckedThrowingContinuation { (c: CheckedContinuation<Void, Error>) in
+                    db.collection("users").document(uid).setData(data) { error in
+                        if let error = error { c.resume(throwing: error) } else { c.resume() }
+                    }
+                }
+            }
+            #endif
             self.authError = nil
         } catch {
             self.authError = error.localizedDescription
         }
         #else
-        // Mock fallback when FirebaseAuth is not linked
-        try? await Task.sleep(nanoseconds: 300_000_000)
-        self.currentUser = User(id: UUID().uuidString, name: name, email: email)
-        self.authError = nil
+        do {
+            try await Task.sleep(nanoseconds: 100_000_000)
+            let user = try userRepository.createUser(name: name, email: email, password: password)
+            self.currentUser = user
+            self.authError = nil
+        } catch {
+            self.authError = error.localizedDescription
+        }
         #endif
+    }
+
+    func updateProfileImage(_ image: UIImage?) {
+        guard let current = currentUser, let uuid = UUID(uuidString: current.id) else { return }
+        do {
+            try userRepository.updateImage(userId: uuid, image: image)
+        } catch {
+        }
+    }
+
+    func loadProfileImage() -> UIImage? {
+        guard let current = currentUser, let uuid = UUID(uuidString: current.id) else { return nil }
+        return try? userRepository.loadImage(userId: uuid)
     }
 }

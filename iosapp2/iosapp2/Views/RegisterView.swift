@@ -16,7 +16,7 @@ struct RegisterView: View {
                     Text("Create Account")
                         .font(.title.bold())
                         .foregroundColor(.white)
-                    Text("Join CivicFix to report and track issues")
+                    Text("Join FixLK to report and track issues")
                         .foregroundColor(.white.opacity(0.8))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

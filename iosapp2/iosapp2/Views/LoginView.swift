@@ -13,7 +13,7 @@ struct LoginView: View {
 
             VStack(spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Welcome to CivicFix")
+                    Text("Welcome to FixLK")
                         .font(.title.bold())
                         .foregroundColor(.white)
                     Text("Sign in to continue")

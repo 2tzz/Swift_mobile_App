@@ -4,7 +4,7 @@ import FirebaseCore
 #endif
 
 @main
-struct CivicFixApp: App {
+struct FixLKApp: App {
     @StateObject private var auth = AuthService()
     init() {
         #if canImport(FirebaseCore)

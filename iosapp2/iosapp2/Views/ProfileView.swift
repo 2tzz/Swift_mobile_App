@@ -1,24 +1,43 @@
 import SwiftUI
 import Charts
+import PhotosUI
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @EnvironmentObject private var auth: AuthService
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var profileImage: UIImage? = nil
 
     var body: some View {
         List {
             if let user = auth.currentUser {
                 Section("Account") {
                     HStack {
-                        Image(systemName: "person.crop.circle.fill")
-                            .font(.system(size: 36))
-                            .foregroundColor(.accentColor)
+                        Group {
+                            if let img = profileImage {
+                                Image(uiImage: img)
+                                    .resizable()
+                                    .scaledToFill()
+                            } else {
+                                Image(systemName: "person.crop.circle.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                        .frame(width: 48, height: 48)
+                        .clipShape(Circle())
+
                         VStack(alignment: .leading) {
                             Text(user.name).font(.headline)
                             Text(user.email).foregroundColor(.secondary).font(.subheadline)
                         }
                     }
 
+                    PhotosPicker(selection: $selectedItem, matching: .images) {
+                        Label("Upload Profile Photo", systemImage: "photo.on.rectangle")
+                    }
+                
                     Button(role: .destructive) { auth.signOut() } label: {
                         Text("Sign Out").frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -75,6 +94,17 @@ struct ProfileView: View {
         .navigationTitle("Profile")
         .task {
             await viewModel.loadReports()
+            if profileImage == nil { profileImage = auth.loadProfileImage() }
+        }
+        .onChange(of: selectedItem) { newItem in
+            guard let newItem = newItem else { return }
+            Task { @MainActor in
+                if let data = try? await newItem.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    profileImage = image
+                    auth.updateProfileImage(image)
+                }
+            }
         }
     }
 }

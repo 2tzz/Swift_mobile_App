@@ -7,6 +7,7 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
     @State private var showSubmission: Bool = false
+    @State private var showProfile: Bool = false
 
     var body: some View {
         ZStack {
@@ -17,48 +18,48 @@ struct HomeView: View {
             )
             .ignoresSafeArea()
 
-            VStack {
+            VStack(spacing: 0) {
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("CivicFix")
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("FixLK")
                             .font(.title2.bold())
-                            .foregroundColor(.primary)
-
-                        Text("Tap Scan Road to report an issue")
+                        Text("Report road issues around you")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-
                     Spacer()
+                    Button {
+                        showProfile = true
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: 22, weight: .semibold))
+                    }
                 }
+                .padding(14)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 6)
                 .padding(.horizontal)
                 .padding(.top, 12)
 
                 Spacer()
 
-                HStack {
-                    Spacer()
-
-                    Button(action: {
-                        showSubmission = true
-                    }) {
-                        HStack(spacing: 8) {
+                VStack(spacing: 12) {
+                    Button(action: { showSubmission = true }) {
+                        HStack(spacing: 10) {
                             Image(systemName: "camera.viewfinder")
                                 .font(.system(size: 18, weight: .semibold))
-
-                            Text("Scan Road")
-                                .font(.system(size: 16, weight: .semibold))
+                            Text("Report Road Issue")
+                                .font(.system(size: 17, weight: .semibold))
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 14)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
                         .background(.ultraThickMaterial)
                         .foregroundColor(.primary)
-                        .clipShape(Capsule())
-                        .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 4)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 24)
                 }
+                .padding(.horizontal)
+                .padding(.bottom, 22)
             }
         }
         .onAppear {
@@ -69,6 +70,10 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showSubmission) {
             SubmissionView(coordinate: viewModel.region.center)
+        }
+        .sheet(isPresented: $showProfile) {
+            NavigationStack { ProfileView() }
+                .environmentObject(AuthService())
         }
     }
 }

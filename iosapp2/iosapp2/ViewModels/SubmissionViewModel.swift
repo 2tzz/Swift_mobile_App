@@ -18,7 +18,7 @@ final class SubmissionViewModel: ObservableObject {
 
     init(
         classifier: RoadClassifierService = .shared,
-        repository: ReportRepository = CoreDataReportRepository(),
+        repository: ReportRepository = FirestoreReportRepository(),
         initialCoordinate: CLLocationCoordinate2D?
     ) {
         self.classifier = classifier

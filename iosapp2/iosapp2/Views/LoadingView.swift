@@ -65,7 +65,7 @@ struct LoadingView: View {
                 }
 
                 VStack(spacing: 8) {
-                    Text("CivicFix")
+                    Text("FixLK")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
 

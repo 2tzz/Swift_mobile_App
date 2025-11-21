@@ -7,7 +7,7 @@ final class ProfileViewModel: ObservableObject {
 
     private let repository: ReportRepository
 
-    init(repository: ReportRepository = CoreDataReportRepository()) {
+    init(repository: ReportRepository = FirestoreReportRepository()) {
         self.repository = repository
     }
 
