@@ -4,14 +4,26 @@ struct RootView: View {
     @State private var isLoading: Bool = true
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoading {
-                    LoadingView {
-                        isLoading = false
+        Group {
+            if isLoading {
+                LoadingView {
+                    isLoading = false
+                }
+            } else {
+                TabView {
+                    NavigationStack {
+                        HomeView()
                     }
-                } else {
-                    HomeView()
+                    .tabItem {
+                        Label("Home", systemImage: "map")
+                    }
+
+                    NavigationStack {
+                        ProfileView()
+                    }
+                    .tabItem {
+                        Label("Profile", systemImage: "person.circle")
+                    }
                 }
             }
         }

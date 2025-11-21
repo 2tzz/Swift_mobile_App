@@ -13,9 +13,15 @@ final class SubmissionViewModel: ObservableObject {
     @Published var coordinate: CLLocationCoordinate2D?
 
     private let classifier: RoadClassifierService
+    private let repository: ReportRepository
 
-    init(classifier: RoadClassifierService = .shared, initialCoordinate: CLLocationCoordinate2D?) {
+    init(
+        classifier: RoadClassifierService = .shared,
+        repository: ReportRepository = CoreDataReportRepository(),
+        initialCoordinate: CLLocationCoordinate2D?
+    ) {
         self.classifier = classifier
+        self.repository = repository
         self.coordinate = initialCoordinate
     }
 
@@ -31,6 +37,18 @@ final class SubmissionViewModel: ObservableObject {
 
         issueType = result.label
         department = departmentForIssueType(result.label)
+    }
+
+    func submitReport() async throws {
+        let report = Report(
+            issueType: issueType.isEmpty ? "Road Issue" : issueType,
+            department: department.isEmpty ? "General City Services" : department,
+            descriptionText: descriptionText,
+            coordinate: coordinate,
+            status: .pending
+        )
+
+        try await repository.save(report: report)
     }
 
     private func departmentForIssueType(_ type: String) -> String {

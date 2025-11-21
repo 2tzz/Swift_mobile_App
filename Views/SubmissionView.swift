@@ -45,8 +45,15 @@ struct SubmissionView: View {
 
                 Section {
                     Button {
-                        // Phase 4: Persist to Firestore + Core Data, then dismiss.
-                        dismiss()
+                        Task {
+                            do {
+                                try await viewModel.submitReport()
+                                dismiss()
+                            } catch {
+                                // In a later phase, surface a user-facing error.
+                                dismiss()
+                            }
+                        }
                     } label: {
                         Text("Submit Report")
                             .frame(maxWidth: .infinity)
