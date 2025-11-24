@@ -5,82 +5,8 @@ import Combine
 import UIKit
 import CoreData
 
-struct ScannerView: View {
-    @StateObject private var camera = CameraManager()
-    @State private var isPresentingPicker = false
-    @State private var saveMessage: String = ""
-    @State private var showSavedBanner = false
-
-    var body: some View {
-        ZStack {
-            CameraPreview(session: camera.session)
-                .ignoresSafeArea()
-            VStack {
-                Spacer()
-                HStack {
-                    Button {
-                        isPresentingPicker = true
-                    } label: {
-                        Image(systemName: "photo.on.rectangle")
-                            .font(.system(size: 22, weight: .medium))
-                            .padding(12)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
-                    }
-
-                    Spacer()
-                    Button {
-                        camera.capturePhoto { image in
-                            guard let image else { return }
-                            YOLODetector.shared.detect(uiImage: image) { detections in
-                                quickSave(detections: detections, image: image)
-                            }
-                        }
-                    } label: {
-                        ZStack {
-                            Circle().fill(.white.opacity(0.2)).frame(width: 74, height: 74)
-                            Circle().fill(.white).frame(width: 60, height: 60)
-                        }
-                    }
-                    Spacer()
-                    Button {
-                        camera.toggleTorch()
-                    } label: {
-                        Image(systemName: camera.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                            .font(.system(size: 22, weight: .medium))
-                            .padding(12)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
-            }
-        }
-        .onAppear { camera.configure() }
-        .sheet(isPresented: $isPresentingPicker) {
-            PhotoPickerView { image in
-                guard let image else { return }
-                YOLODetector.shared.detect(uiImage: image) { detections in
-                    quickSave(detections: detections, image: image)
-                }
-            }
-        }
-        .overlay(alignment: .top) {
-            if showSavedBanner {
-                Text(saveMessage)
-                    .padding(10)
-                    .background(Color.black.opacity(0.7))
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    .padding(.top, 50)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            }
-        }
-    }
-}
-
-private struct CameraPreview: UIViewRepresentable {
+// Camera preview layer for SwiftUI (file-scoped helper)
+struct CameraPreview: UIViewRepresentable {
     let session: AVCaptureSession
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
@@ -115,7 +41,7 @@ final class CameraManager: NSObject, ObservableObject, AVCapturePhotoCaptureDele
                 if granted { self.setupSession() }
             }
         default:
-            break // denied/restricted: do nothing, maybe show UI elsewhere
+            break
         }
     }
 
@@ -158,7 +84,7 @@ final class CameraManager: NSObject, ObservableObject, AVCapturePhotoCaptureDele
     }
 }
 
-private struct PhotoPickerView: UIViewControllerRepresentable {
+struct PhotoPickerView: UIViewControllerRepresentable {
     var completion: (UIImage?) -> Void
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
@@ -184,55 +110,104 @@ private struct PhotoPickerView: UIViewControllerRepresentable {
                 first.itemProvider.loadObject(ofClass: UIImage.self) { obj, _ in
                     DispatchQueue.main.async { self.completion(obj as? UIImage) }
                 }
-            } else {
-                completion(nil)
-            }
+            } else { completion(nil) }
         }
     }
 }
 
-// MARK: - Quick Save helper
-private extension ScannerView {
-    func quickSave(detections: [Detection], image: UIImage) {
-        let context = AssetScanStore.shared.container.viewContext
-        guard !detections.isEmpty else {
-            saveMessage = "No objects detected"
-            withAnimation { showSavedBanner = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation { showSavedBanner = false }
+struct ScannerView: View {
+    @StateObject private var camera = CameraManager()
+    @State private var isPresentingPicker = false
+    @State private var saveMessage: String = ""
+    @State private var showSavedBanner = false
+    
+    @State private var isPresentingReview = false
+    @State private var reviewImage: UIImage? = nil
+    @State private var reviewDetections: [Detection] = []
+    
+    var body: some View {
+        ZStack {
+            CameraPreview(session: camera.session)
+                .ignoresSafeArea()
+            VStack {
+                Spacer()
+                
+                HStack {
+                    Button {
+                        // dismiss keyboard (if any) before presenting photo picker
+                        dismissKeyboard()
+                        isPresentingPicker = true
+                    } label: {
+                        Image(systemName: "photo.on.rectangle")
+                            .font(.system(size: 22, weight: .medium))
+                            .padding(12)
+                            .background(Color.white.opacity(0.12))
+                            .clipShape(Circle())
+                            .foregroundColor(.white)
+                    }
+                    
+                    Spacer()
+                    Button {
+                        camera.capturePhoto { image in
+                            guard let image else { return }
+                            YOLODetector.shared.detect(uiImage: image) { detections in
+                                let threshold = ClassSettings.detectionThreshold
+                                let enabled = Set(YOLODetector.shared.availableClassNames.filter { ClassSettings.isEnabled(label: $0) })
+                                let filtered = detections.filter { Double($0.confidence) >= threshold && enabled.contains($0.label) }
+                                reviewImage = image
+                                reviewDetections = filtered
+                                // ensure keyboard hidden before presenting review
+                                dismissKeyboard()
+                                isPresentingReview = true
+                            }
+                        }
+                    } label: {
+                        ZStack {
+                            Circle().fill(.white.opacity(0.2)).frame(width: 74, height: 74)
+                            Circle().fill(.white).frame(width: 60, height: 60)
+                        }
+                    }
+                    Spacer()
+                    Button {
+                        camera.toggleTorch()
+                    } label: {
+                        Image(systemName: camera.isTorchOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                            .font(.system(size: 22, weight: .medium))
+                            .padding(12)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
             }
-            return
         }
-        do {
-            let url = try ImageStore.save(image)
-            let date = Date()
-            let location = "General"
-            for det in detections {
-                let item = NSEntityDescription.insertNewObject(forEntityName: "InventoryItem", into: context) as! InventoryItem
-                item.id = det.id
-                item.label = det.label
-                item.x = det.rect.origin.x
-                item.y = det.rect.origin.y
-                item.width = det.rect.size.width
-                item.height = det.rect.size.height
-                item.imageURL = url.absoluteString
-                item.location = location
-                item.date = date
+        .onAppear { camera.configure() }
+        .sheet(isPresented: $isPresentingPicker) {
+            PhotoPickerView { image in
+                guard let image else { return }
+                YOLODetector.shared.detect(uiImage: image) { detections in
+                    let threshold = ClassSettings.detectionThreshold
+                    let enabled = Set(YOLODetector.shared.availableClassNames.filter { ClassSettings.isEnabled(label: $0) })
+                    let filtered = detections.filter { Double($0.confidence) >= threshold && enabled.contains($0.label) }
+                    reviewImage = image
+                    reviewDetections = filtered
+                    isPresentingReview = true
+                }
             }
-            try context.save()
-            let grouped = Dictionary(grouping: detections, by: { $0.label }).mapValues { $0.count }
-            let summary = grouped.sorted { $0.key < $1.key }.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
-            saveMessage = "Saved: \(summary)"
-            withAnimation { showSavedBanner = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-                withAnimation { showSavedBanner = false }
-            }
-        } catch {
-            saveMessage = "Save failed"
-            withAnimation { showSavedBanner = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation { showSavedBanner = false }
+        }
+        
+        .sheet(isPresented: $isPresentingReview) {
+            if let img = reviewImage {
+                NavigationView {
+                    DetectionReviewView(image: img, initialDetections: reviewDetections)
+                }
+            } else {
+                Text("No image for review")
             }
         }
     }
+    // Simple location picker sheet
+    
+    // quickSave moved to `ScannerExtras.swift` to keep this file focused
 }

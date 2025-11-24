@@ -165,6 +165,11 @@ final class YOLODetector {
         return nil
     }()
 
+    // Public accessor for available class names (empty array if unknown)
+    public var availableClassNames: [String] {
+        return classNames ?? []
+    }
+
     func detect(uiImage: UIImage, completion: @escaping ([Detection]) -> Void) {
         // Prefer direct Core ML path first, since many YOLO packages don't expose Vision object detections
         queue.async {
@@ -181,8 +186,8 @@ final class YOLODetector {
             }
 
             // Prefer CGImage but fall back to CIImage when needed
-            var cgImage: CGImage? = uiImage.cgImage
-            var ciImage: CIImage? = uiImage.ciImage
+            let cgImage: CGImage? = uiImage.cgImage
+            let ciImage: CIImage? = uiImage.ciImage
 
             func makeRequest(option: VNImageCropAndScaleOption, done: @escaping ([Detection]) -> Void) -> VNCoreMLRequest {
                 let req = VNCoreMLRequest(model: vnModel) { request, _ in
@@ -273,7 +278,7 @@ final class YOLODetector {
         // Try common names first (per your model's Predictions: 'confidence' [D,80], 'coordinates' [D,4])
         var coords: MLMultiArray? = feature("coordinates") ?? feature("boxes")
         var conf: MLMultiArray? = feature("confidence") ?? feature("scores")
-        var cls: MLMultiArray? = feature("labels") ?? feature("classes")
+        _ = feature("labels") ?? feature("classes")
 
         // If unknown names, heuristic: pick any [D,4] for coords, and any [D] or [D,C] for conf
         if coords == nil || conf == nil {

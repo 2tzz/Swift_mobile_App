@@ -8,6 +8,8 @@ enum ImageStore {
             throw NSError(domain: "ImageStore", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode JPEG"])
         }
         try data.write(to: url, options: .atomic)
+        // debug log saved path
+        print("ImageStore: saved image to \(url.path)")
         return url
     }
 
